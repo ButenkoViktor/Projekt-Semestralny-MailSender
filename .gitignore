@@ -1,0 +1,14 @@
+// folder z buildami
+bin/
+// folder z plikami tymczasowymi
+obj/
+
+// folder z ustawieniami Visual Studio i Visual Studio Code
+.vs/
+.vscode/
+
+*.user
+*.suo
+
+// Sekrety
+appsettings.Development.json
