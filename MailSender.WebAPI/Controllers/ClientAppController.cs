@@ -1,4 +1,5 @@
 using MailSender.Application.DTOs;
+using MailSender.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MailSender.WebAPI.Controllers;
@@ -8,14 +9,16 @@ namespace MailSender.WebAPI.Controllers;
 public class ClientAppController : ControllerBase
 {
     private readonly IConfiguration _configuration;
+       private readonly IJwtTokenService _jwt;
 
-    public ClientAppController(IConfiguration configuration)
+    public ClientAppController(IConfiguration configuration, IJwtTokenService jwt)
     {
         _configuration = configuration;
+        _jwt = jwt;
     }
 
-    [HttpPost("register")]
-    public IActionResult Register(RegisterClientRequestDto request)
+[HttpPost("register")]
+public IActionResult Register([FromBody] RegisterClientRequestDto request)
     {
         var validPasswords = _configuration.GetSection("Registration:Passwords").Get<List<string>>();
 
@@ -27,11 +30,13 @@ public class ClientAppController : ControllerBase
             });
         }
 
+        var token = _jwt.GenerateToken(request.AppId, request.AppName);
+
         return Ok(new
         {
-            message = "Registration endpoint works",
-            request.AppId,
-            request.AppName
+            appId = request.AppId,
+            appName = request.AppName,
+            key = token
         });
     }
 }
