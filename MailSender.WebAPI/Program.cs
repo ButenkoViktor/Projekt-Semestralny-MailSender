@@ -2,10 +2,13 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using MailSender.Infrastructure.Services;
+using MailSender.Infrastructure.Configuration;
 using MailSender.Application.Interfaces;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.Configure<BrevoSettings>(
+    builder.Configuration.GetSection("Brevo"));
 var jwtKey = builder.Configuration["Jwt:Key"]
     ?? throw new InvalidOperationException("Jwt:Key is missing");
 var key = Encoding.UTF8.GetBytes(jwtKey);
@@ -31,6 +34,7 @@ builder.Services.AddControllers();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
+builder.Services.AddHttpClient<IMailService, BrevoMailService>();
 
 builder.Services.AddSwaggerGen(options =>
 {
