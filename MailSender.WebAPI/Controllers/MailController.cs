@@ -1,4 +1,6 @@
+using System.Security.Claims;
 using MailSender.Application.DTOs;
+using MailSender.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -6,22 +8,30 @@ namespace MailSender.WebAPI.Controllers;
 
 [ApiController]
 [Route("mail")]
-[Authorize]
 public class MailController : ControllerBase
 {
+    private readonly IMailService _mailService;
+
+    public MailController(IMailService mailService)
+    {
+        _mailService = mailService;
+    }
+
+    [Authorize]
     [HttpPost("send")]
-    public IActionResult Send([FromBody] SendMailRequestDto request)
+    public async Task<IActionResult> Send([FromBody] SendMailRequestDto request)
     {
         var appId = User.FindFirst("appId")?.Value;
         var appName = User.FindFirst("appName")?.Value;
 
         var subject = request.Subject;
-        var body = request.Body;
 
         if (subject.EndsWith("?"))
         {
             subject = $"[Q] {subject}";
         }
+
+        var body = request.Body;
 
         if (body.Contains("Butenko"))
         {
@@ -29,6 +39,19 @@ public class MailController : ControllerBase
                 "Butenko",
                 "[student.butenko]Butenko[/student.butenko]");
         }
+        if (body.Contains("Slipchyshyn"))
+        {
+            body = body.Replace(
+                "Slipchyshyn",
+                "[student.Slipchyshyn]Slipchyshyn[/student.Slipchyshyn]"
+            );
+        }
+
+        await _mailService.SendEmailAsync(
+            request.To,
+            subject,
+            body
+        );
 
         return Ok(new
         {
