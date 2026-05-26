@@ -1,0 +1,13 @@
+.openapi-generator-ignore
+apis/ClientAppApi.ts
+apis/MailApi.ts
+apis/index.ts
+docs/ClientAppApi.md
+docs/MailApi.md
+docs/RegisterClientRequestDto.md
+docs/SendMailRequestDto.md
+index.ts
+models/RegisterClientRequestDto.ts
+models/SendMailRequestDto.ts
+models/index.ts
+runtime.ts
