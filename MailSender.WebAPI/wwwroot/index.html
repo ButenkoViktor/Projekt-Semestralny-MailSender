@@ -1,0 +1,257 @@
+<!--
+PROMPT 
+Stwórz nowoczesną i estetyczną stronę HTML umożliwiającą wysyłanie wiadomości email
+za pośrednictwem usługi MailSender API.
+
+Wymagania:
+- pola: odbiorca, temat, treść wiadomości, token JWT
+- nowoczesny wygląd (glassmorphism / gradient / responsive design)
+- użyj czystego HTML, CSS i JavaScript
+- formularz powinien wysyłać POST request do endpointu /mail/send
+- token JWT ma być wysyłany w nagłówku Authorization Bearer
+- pokaż komunikat sukcesu lub błędu
+- strona ma działać bez frameworków frontendowych
+- kod ma być czytelny i gotowy do uruchomienia
+-->
+
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>MailSender Client</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            padding: 35px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+            color: white;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 32px;
+        }
+
+        .subtitle {
+            text-align: center;
+            margin-bottom: 30px;
+            opacity: 0.8;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            outline: none;
+            font-size: 15px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+        }
+
+        input::placeholder,
+        textarea::placeholder {
+            color: rgba(255,255,255,0.7);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 140px;
+        }
+
+        button {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            background: #00c6ff;
+            background: linear-gradient(to right, #0072ff, #00c6ff);
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            opacity: 0.95;
+        }
+
+        .message {
+            margin-top: 20px;
+            text-align: center;
+            font-weight: bold;
+            padding: 12px;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .success {
+            background-color: rgba(0, 255, 100, 0.2);
+            border: 1px solid #00ff88;
+        }
+
+        .error {
+            background-color: rgba(255, 0, 0, 0.2);
+            border: 1px solid #ff4b4b;
+        }
+
+        @media(max-width: 600px) {
+            .container {
+                padding: 25px;
+            }
+
+            h1 {
+                font-size: 26px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>📧 MailSender</h1>
+    <p class="subtitle">Wysyłanie wiadomości email przez API</p>
+
+    <form id="mailForm">
+
+        <div class="form-group">
+            <label for="token">Token JWT</label>
+            <input
+                type="text"
+                id="token"
+                placeholder="Wprowadź token JWT"
+                required
+            />
+        </div>
+
+        <div class="form-group">
+            <label for="receiver">Odbiorca</label>
+            <input
+                type="email"
+                id="receiver"
+                placeholder="example@email.com"
+                required
+            />
+        </div>
+
+        <div class="form-group">
+            <label for="subject">Temat</label>
+            <input
+                type="text"
+                id="subject"
+                placeholder="Temat wiadomości"
+                required
+            />
+        </div>
+
+        <div class="form-group">
+            <label for="content">Treść wiadomości</label>
+            <textarea
+                id="content"
+                placeholder="Napisz wiadomość..."
+                required
+            ></textarea>
+        </div>
+
+        <button type="submit">
+            Wyślij wiadomość
+        </button>
+
+    </form>
+
+    <div id="responseMessage" class="message"></div>
+</div>
+
+<script>
+    const form = document.getElementById("mailForm");
+    const responseMessage = document.getElementById("responseMessage");
+
+    form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const token = document.getElementById("token").value;
+        const receiver = document.getElementById("receiver").value;
+        const subject = document.getElementById("subject").value;
+        const content = document.getElementById("content").value;
+
+        const payload = {
+            to: receiver,
+            subject: subject,
+            body: content
+        };
+
+        try {
+
+            const response = await fetch("/mail/send", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (response.ok) {
+                showMessage("Wiadomość została wysłana pomyślnie!", true);
+                form.reset();
+            } else {
+                const errorText = await response.text();
+                showMessage("Błąd: " + errorText, false);
+            }
+
+        } catch (error) {
+            showMessage("Nie udało się połączyć z API.", false);
+        }
+    });
+
+    function showMessage(message, success) {
+
+        responseMessage.style.display = "block";
+        responseMessage.textContent = message;
+
+        if (success) {
+            responseMessage.className = "message success";
+        } else {
+            responseMessage.className = "message error";
+        }
+    }
+</script>
+
+</body>
+</html>
