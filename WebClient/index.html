@@ -218,15 +218,14 @@ Wymagania:
 
         try {
 
-            const response = await fetch("/mail/send", {
+            const response = await fetch("http://localhost:5242/mail/send", {
                 method: "POST",
                 headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
                 },
                 body: JSON.stringify(payload)
             });
-
             if (response.ok) {
                 showMessage("Wiadomość została wysłana pomyślnie!", true);
                 form.reset();
