@@ -3,6 +3,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using MailSender.Infrastructure.Services;
 using MailSender.Infrastructure.Configuration;
+using MailSender.Infrastructure.Providers;
 using MailSender.Application.Interfaces;
 using Microsoft.OpenApi.Models;
 
@@ -13,6 +14,8 @@ var jwtKey = builder.Configuration["Jwt:Key"]
     ?? throw new InvalidOperationException("Jwt:Key is missing");
 var key = Encoding.UTF8.GetBytes(jwtKey);
 
+builder.Services.Configure<MailTrapSettings>(
+    builder.Configuration.GetSection("MailTrap"));
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -46,8 +49,12 @@ builder.Services.AddControllers();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
-builder.Services.AddHttpClient<IMailService, BrevoMailService>();
+builder.Services.AddScoped<IMailSenderProvider, BrevoMailSender>();
+// builder.Services.AddScoped<IMailSenderProvider, MailTrapMailSender>();
+builder.Services.AddHttpClient<BrevoMailSender>();
 
+// builder.Services.AddHttpClient<MailTrapMailSender>();
+ 
 builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new OpenApiInfo

@@ -10,11 +10,11 @@ namespace MailSender.WebAPI.Controllers;
 [Route("mail")]
 public class MailController : ControllerBase
 {
-    private readonly IMailService _mailService;
+    private readonly IMailSenderProvider _mailSenderProvider;
 
-    public MailController(IMailService mailService)
+    public MailController(IMailSenderProvider mailSenderProvider)
     {
-        _mailService = mailService;
+        _mailSenderProvider = mailSenderProvider;
     }
 
     [Authorize]
@@ -47,7 +47,7 @@ public class MailController : ControllerBase
             );
         }
 
-        await _mailService.SendEmailAsync(
+        await _mailSenderProvider.SendEmailAsync(
             request.To,
             subject,
             body
